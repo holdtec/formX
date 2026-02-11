@@ -21,6 +21,19 @@ formx 是一个 **Schema 驱动**、**可插拔**、**框架无关** 的复杂�
 *   **Card Model (卡片模型)**: 专为复杂的嵌套数据结构设计，支持 List -> Card -> Section -> Fields 的层级。
 *   **Framework Agnostic**: 核心库零依赖，适配层可对接 Zustand, Redux, Pinia 等。
 
+## 📦 安装
+
+```bash
+# 使用 npm
+npm install @enginx/formx-core
+
+# 使用 yarn
+yarn add @enginx/formx-core
+
+# 使用 pnpm
+pnpm add @enginx/formx-core
+```
+
 ## 🏗 架构设计
 
 ```mermaid
