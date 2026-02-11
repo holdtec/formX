@@ -25,7 +25,7 @@ formx 是一个 **Schema 驱动**、**可插拔**、**框架无关** 的复杂�
 graph TD
     A[Blueprint Schema Layer] -->|定义元数据| B[Runtime Engine Layer]
     B -->|计算与依赖| C[Runtime Store]
-    C -->|状态订阅| D[Cell Render Layer (UI)]
+    C -->|状态订阅| D[Cell Render Layer - UI]
     D -->|Action 触发| B
 ```
 
