@@ -5,41 +5,50 @@ import {
   BookOpen, Plus, Trash2, ChevronDown, ChevronUp, Copy, GripVertical,
   FileJson, Route, Calculator, Package, Wrench, Zap, Lock, FileCode, Eye,
   Smartphone, ShoppingBag, Minus, CheckSquare, Square, Menu, Anchor, Lightbulb,
-  Table, List, Braces, MousePointerClick
+  Table, List, Braces, MousePointerClick, Home, Share2, Sparkles, Github
 } from 'lucide-react';
 import { createRuntime, RuntimeEngine } from './lib/core';
 import { createVanillaStore } from './lib/store';
 import type { FieldSchema } from './types';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<'architecture' | 'core' | 'ui' | 'plan' | 'demo' | 'docs'>('architecture');
+  const [activeTab, setActiveTab] = useState<'home' | 'architecture' | 'core' | 'ui' | 'plan' | 'demo' | 'docs'>('home');
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+      <header className={`bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 transition-all duration-200 ${activeTab === 'home' ? 'shadow-sm' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="bg-indigo-600 p-2 rounded-lg">
+          <div 
+            className="flex items-center space-x-3 cursor-pointer group" 
+            onClick={() => setActiveTab('home')}
+          >
+            <div className="bg-indigo-600 p-2 rounded-lg group-hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
               <Cpu className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900">formx</h1>
-              <p className="text-xs text-slate-500 font-medium tracking-wide uppercase">Headless 计算内核，驱动多端业务逻辑 <span className="opacity-70 text-indigo-600">@enginx</span></p>
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">formx</h1>
+              <p className="text-[10px] text-slate-500 font-bold tracking-widest uppercase hidden sm:block">Logic Engine <span className="text-indigo-600 opacity-60">@enginx</span></p>
             </div>
           </div>
-          <div className="flex space-x-1 overflow-x-auto no-scrollbar">
-            <TabButton id="architecture" label="架构设计" icon={<Layers className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
-            <TabButton id="core" label="核心需求" icon={<Code className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
-            <TabButton id="ui" label="Card 引擎" icon={<LayoutGrid className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
-            <TabButton id="plan" label="开发计划" icon={<GitMerge className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
-            <TabButton id="docs" label="用户文档" icon={<BookOpen className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
-            <div className="w-px h-6 bg-slate-300 mx-2 self-center hidden md:block"></div>
-            <TabButton id="demo" label="Card 演示" icon={<Play className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} highlight />
+          
+          <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar py-2 pl-4">
+            <TabButton id="home" label="首页" icon={<Home className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
+            <div className="w-px h-5 bg-slate-200 mx-2 hidden md:block"></div>
+            <TabButton id="architecture" label="架构" icon={<Layers className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
+            <TabButton id="demo" label="演示" icon={<Play className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} highlight />
+            <TabButton id="docs" label="文档" icon={<BookOpen className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
+            {/* Secondary tabs hidden on mobile or shown in dropdown in real app, keeping simple here */}
+            <div className="hidden lg:flex space-x-1">
+              <TabButton id="core" label="核心需求" icon={<Code className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
+              <TabButton id="ui" label="UI 规范" icon={<LayoutGrid className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
+              <TabButton id="plan" label="计划" icon={<GitMerge className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-4rem)]">
+        {activeTab === 'home' && <LandingPageView onNavigate={setActiveTab} />}
         {activeTab === 'architecture' && <ArchitectureView />}
         {activeTab === 'core' && <CoreRequirementsView />}
         {activeTab === 'ui' && <UiSpecsView />}
@@ -47,9 +56,257 @@ export function App() {
         {activeTab === 'docs' && <DocsView />}
         {activeTab === 'demo' && <KernelDemoView />}
       </main>
+      
+      {activeTab === 'home' && (
+        <footer className="bg-white border-t border-slate-200 py-12 mt-12">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <div className="flex justify-center items-center space-x-2 mb-4 text-slate-900 font-bold text-lg">
+               <Cpu className="w-5 h-5 text-indigo-600" />
+               <span>formx</span>
+            </div>
+            <p className="text-slate-500 text-sm mb-6">
+              © 2024 @enginx organization. Open source under MIT License.
+            </p>
+            <div className="flex justify-center space-x-6 text-slate-400">
+               <a href="#" className="hover:text-slate-600 transition-colors"><Github className="w-5 h-5"/></a>
+               <a href="#" className="hover:text-slate-600 transition-colors"><Share2 className="w-5 h-5"/></a>
+            </div>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
+
+// --- LANDING PAGE ---
+
+const LandingPageView = ({ onNavigate }: { onNavigate: (tab: any) => void }) => {
+  return (
+    <div className="space-y-24 animate-in fade-in duration-500">
+      
+      {/* Hero Section */}
+      <section className="text-center pt-16 pb-12 relative">
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-500/10 blur-[100px] rounded-full -z-10"></div>
+         
+         <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-bold mb-8 animate-bounce-slow">
+            <Sparkles className="w-3 h-3 mr-2" />
+            v1.0.0-beta is now available
+         </div>
+         
+         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 leading-tight">
+            复杂表单的 <br className="hidden md:block"/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Headless 计算大脑</span>
+         </h1>
+         
+         <p className="max-w-2xl mx-auto text-xl text-slate-500 mb-10 leading-relaxed">
+            告别面条式代码。Formx 将业务逻辑与 UI 彻底解耦，提供一套 Schema 驱动、自动依赖追踪的标准化运行时，让企业级表单开发像搭积木一样简单。
+         </p>
+         
+         <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <button 
+              onClick={() => onNavigate('demo')}
+              className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-lg shadow-xl shadow-indigo-200 transition-all hover:scale-105 flex items-center justify-center"
+            >
+               <Play className="w-5 h-5 mr-2 fill-current" />
+               查看 Live Demo
+            </button>
+            <button 
+              onClick={() => onNavigate('docs')}
+              className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold text-lg shadow-sm transition-all hover:border-slate-300 flex items-center justify-center"
+            >
+               <BookOpen className="w-5 h-5 mr-2" />
+               阅读文档
+            </button>
+         </div>
+         
+         {/* Tech Stack Badges */}
+         <div className="mt-12 flex justify-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+            <div className="flex items-center space-x-2 text-sm font-semibold text-slate-500"><Code className="w-4 h-4"/><span>TypeScript</span></div>
+            <div className="flex items-center space-x-2 text-sm font-semibold text-slate-500"><LayoutGrid className="w-4 h-4"/><span>React/Vue</span></div>
+            <div className="flex items-center space-x-2 text-sm font-semibold text-slate-500"><Zap className="w-4 h-4"/><span>Zero Dep</span></div>
+         </div>
+      </section>
+
+      {/* Value Props Grid */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+         <FeatureCard 
+            icon={<GitMerge className="w-6 h-6 text-white" />}
+            color="bg-blue-500"
+            title="智能依赖图 (DAG)"
+            desc="内置有向无环图算法。只需定义 A = B + C，引擎自动处理计算顺序，从此告别 useEffect 级联地狱。"
+         />
+         <FeatureCard 
+            icon={<Smartphone className="w-6 h-6 text-white" />}
+            color="bg-purple-500"
+            title="一套逻辑，多端运行"
+            desc="核心逻辑纯 JS 实现。编写一次 Schema，即可同时驱动 React Web 后台、Vue H5 商城和小程序。"
+         />
+         <FeatureCard 
+            icon={<Package className="w-6 h-6 text-white" />}
+            color="bg-emerald-500"
+            title="Card 模型架构"
+            desc="专为复杂的嵌套数据结构设计（如订单明细、动态配置）。支持 List -> Card -> Section -> Field 无限层级。"
+         />
+         <FeatureCard 
+            icon={<Zap className="w-6 h-6 text-white" />}
+            color="bg-amber-500"
+            title="毫秒级精确更新"
+            desc="基于 Proxy 与订阅模式，精确到字段级的更新粒度。即使表格有 1000 行数据，输入依然丝滑流畅。"
+         />
+      </section>
+
+      {/* Code Comparison */}
+      <section className="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+         <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-800">
+            {/* The Old Way */}
+            <div className="p-8">
+               <div className="flex items-center space-x-2 mb-6 opacity-50">
+                  <AlertTriangle className="w-5 h-5 text-red-500" />
+                  <h3 className="font-bold text-red-400 uppercase tracking-wider text-sm">The Old Way (React)</h3>
+               </div>
+               <pre className="font-mono text-xs text-slate-400 leading-relaxed overflow-x-auto">
+{`// ❌ 逻辑散落在组件各处
+const [price, setPrice] = useState(0);
+const [qty, setQty] = useState(0);
+const [total, setTotal] = useState(0);
+
+// 👎 手动管理依赖，容易漏写
+useEffect(() => {
+  setTotal(price * qty);
+}, [price, qty]); // 如果漏了依赖？
+
+// 👎 甚至需要在渲染时处理逻辑
+return (
+  <input 
+    onChange={e => {
+       setPrice(e.target.value);
+       // 或者是这样命令式调用？
+       recalcTotal(); 
+    }} 
+  />
+)`}
+               </pre>
+            </div>
+
+            {/* The Formx Way */}
+            <div className="p-8 bg-slate-900/50">
+               <div className="flex items-center space-x-2 mb-6">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                  <h3 className="font-bold text-emerald-400 uppercase tracking-wider text-sm">The formx Way</h3>
+               </div>
+               <pre className="font-mono text-xs text-emerald-300 leading-relaxed overflow-x-auto">
+{`// ✅ 逻辑内聚在 Schema 中
+const schema = [
+  { key: 'price', type: 'NUMBER' },
+  { key: 'qty', type: 'NUMBER' },
+  { 
+    key: 'total', 
+    type: 'MONETARY',
+    read_only: true,
+    // ✨ 声明式依赖，引擎自动构建 DAG
+    expression: 'price * qty' 
+  }
+];
+
+// UI 组件只负责渲染，0 业务逻辑
+<Field path="total" />`}
+               </pre>
+            </div>
+         </div>
+      </section>
+
+      {/* Architecture Teaser */}
+      <section className="flex flex-col lg:flex-row items-center gap-12 py-12">
+          <div className="flex-1 space-y-6">
+             <div className="inline-flex items-center px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider">
+               Architecture
+             </div>
+             <h2 className="text-3xl font-bold text-slate-900">分层架构，各司其职</h2>
+             <p className="text-lg text-slate-600">
+                Formx 严格遵循 MVVM 模式，将 Schema 定义、运行时计算和 UI 渲染彻底分离。
+                这种设计不仅提高了代码的可维护性，还让“更换 UI 库”变得前所未有的简单。
+             </p>
+             <ul className="space-y-4">
+                <li className="flex items-start">
+                   <CheckCircle2 className="w-5 h-5 text-indigo-600 mr-3 mt-0.5" />
+                   <div>
+                      <strong className="text-slate-900">Schema Layer:</strong> 纯 JSON 定义，可远程下发，支持动态表单。
+                   </div>
+                </li>
+                <li className="flex items-start">
+                   <CheckCircle2 className="w-5 h-5 text-indigo-600 mr-3 mt-0.5" />
+                   <div>
+                      <strong className="text-slate-900">Runtime Layer:</strong> 包含 Store、DAG 计算引擎和校验器。
+                   </div>
+                </li>
+                <li className="flex items-start">
+                   <CheckCircle2 className="w-5 h-5 text-indigo-600 mr-3 mt-0.5" />
+                   <div>
+                      <strong className="text-slate-900">UI Adapter:</strong> 极薄的适配层，支持 React, Vue, Svelte 等。
+                   </div>
+                </li>
+             </ul>
+             <div className="pt-4">
+                <button onClick={() => onNavigate('architecture')} className="text-indigo-600 font-bold hover:text-indigo-800 flex items-center">
+                   深入了解架构设计 <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+             </div>
+          </div>
+          <div className="flex-1 bg-white p-8 rounded-2xl shadow-xl border border-slate-100 relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -z-0"></div>
+             <div className="relative z-10 space-y-6">
+                <div className="flex justify-center">
+                   <div className="bg-slate-800 text-white px-6 py-3 rounded-lg shadow-lg font-mono text-sm">Blueprint Schema</div>
+                </div>
+                <div className="flex justify-center"><ArrowRight className="rotate-90 text-slate-300"/></div>
+                <div className="bg-indigo-600 text-white p-6 rounded-xl shadow-xl text-center">
+                   <Cpu className="w-8 h-8 mx-auto mb-2 text-indigo-200"/>
+                   <div className="font-bold text-lg">Runtime Engine</div>
+                   <div className="text-xs text-indigo-200 mt-1">Dependency Graph & State</div>
+                </div>
+                <div className="flex justify-center"><ArrowRight className="rotate-90 text-slate-300"/></div>
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="bg-white border-2 border-slate-200 p-4 rounded-lg text-center text-slate-600 font-bold text-sm">React UI</div>
+                   <div className="bg-white border-2 border-slate-200 p-4 rounded-lg text-center text-slate-600 font-bold text-sm">Vue UI</div>
+                </div>
+             </div>
+          </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-indigo-600 rounded-3xl p-12 text-center text-white relative overflow-hidden">
+         <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+         <div className="relative z-10">
+            <h2 className="text-3xl font-bold mb-4">准备好重构你的复杂业务了吗？</h2>
+            <p className="text-indigo-100 mb-8 max-w-xl mx-auto text-lg">
+               加入 formx 生态，体验逻辑与视图分离带来的极致开发效率。
+            </p>
+            <button 
+               onClick={() => onNavigate('docs')}
+               className="bg-white text-indigo-600 px-8 py-3 rounded-lg font-bold hover:bg-indigo-50 transition-colors shadow-lg"
+            >
+               立即开始集成
+            </button>
+         </div>
+      </section>
+
+    </div>
+  );
+};
+
+const FeatureCard = ({ icon, color, title, desc }: any) => (
+  <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 group">
+     <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform`}>
+        {icon}
+     </div>
+     <h3 className="font-bold text-lg text-slate-900 mb-2">{title}</h3>
+     <p className="text-sm text-slate-500 leading-relaxed">
+        {desc}
+     </p>
+  </div>
+);
+
+// ... existing components ...
 
 // --- DEMO IMPLEMENTATION (CARD MODEL) ---
 
@@ -135,7 +392,7 @@ const KernelDemoView = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       {/* UI Layer */}
       <div className="lg:col-span-7 flex flex-col space-y-4">
@@ -180,7 +437,7 @@ const KernelDemoView = () => {
                           disabled={field.read_only}
                           value={state[field.key] || ''}
                           onChange={e => engine.setValue(field.key, e.target.value)}
-                          className="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border bg-white"
+                          className="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border bg-white transition-colors"
                         />
                       </div>
                    ))}
@@ -190,7 +447,7 @@ const KernelDemoView = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide">采购清单 (Record Cards)</h4>
-                    <button onClick={addItem} className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md flex items-center transition-colors">
+                    <button onClick={addItem} className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md flex items-center transition-colors shadow-sm">
                       <Plus className="w-3 h-3 mr-1" /> 添加条目
                     </button>
                   </div>
@@ -201,7 +458,7 @@ const KernelDemoView = () => {
                       if (!cardConfig) return null;
 
                       return (
-                        <div key={index} className="bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
+                        <div key={index} className="bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-shadow group animate-in fade-in slide-in-from-bottom-2 duration-300">
                           {/* Card Header */}
                           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 rounded-t-lg">
                              <div className="flex items-center space-x-3">
@@ -239,7 +496,7 @@ const KernelDemoView = () => {
                                                   : e.target.value;
                                                 engine.setValue(path, val);
                                               }}
-                                              className={`block w-full rounded border-0 py-1.5 px-2 text-sm shadow-sm ring-1 ring-inset ${
+                                              className={`block w-full rounded border-0 py-1.5 px-2 text-sm shadow-sm ring-1 ring-inset transition-all ${
                                                 field.read_only 
                                                   ? 'bg-slate-50 text-slate-500 ring-slate-200' 
                                                   : 'text-slate-900 ring-slate-300 focus:ring-indigo-600'
@@ -506,7 +763,7 @@ const KernelDemoView = () => {
 };
 
 const CodeSnippet = ({ title, description, code }: { title: string, description: string, code: string }) => (
-  <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-950">
+  <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-950 shadow-lg">
     <div className="bg-slate-800 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
       <div>
         <span className="text-xs font-bold text-slate-200 block">{title}</span>
@@ -518,7 +775,7 @@ const CodeSnippet = ({ title, description, code }: { title: string, description:
         <div className="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
       </div>
     </div>
-    <div className="p-4 overflow-x-auto">
+    <div className="p-4 overflow-x-auto custom-scrollbar">
       <pre className="text-xs font-mono text-emerald-400 leading-relaxed">
         {code}
       </pre>
@@ -532,7 +789,7 @@ const DocsView = () => {
   const [activeDocTab, setActiveDocTab] = useState('intro');
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 min-h-[600px]">
+    <div className="flex flex-col lg:flex-row gap-8 min-h-[600px] animate-in fade-in duration-300">
       {/* Sidebar Navigation */}
       <div className="w-full lg:w-64 flex-shrink-0">
          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sticky top-24">
@@ -941,8 +1198,7 @@ const DocHeadless = ({ onNavigate }: any) => (
       <div className="pt-2">
          <p className="text-sm text-slate-500 mb-3">查看我们的演示，体验同一套 Schema 如何驱动 Web 和 Mobile 两种截然不同的界面：</p>
          <button onClick={() => { /* Hacky way to switch main tab */ 
-            const demoBtn = document.getElementById('demo') as HTMLElement;
-            if (demoBtn) demoBtn.click();
+            onNavigate('demo');
          }} className="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors">
             <Play className="w-4 h-4 mr-2"/> 前往 Live Demo
          </button>
@@ -1173,12 +1429,12 @@ const Phase = ({ number, title, tasks, status, description }: any) => {
 const TabButton = ({ id, label, icon, active, onClick, highlight }: any) => (
   <button
     onClick={() => onClick(id)}
-    className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+    className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
       active === id 
-        ? 'bg-indigo-50 text-indigo-700' 
+        ? 'bg-indigo-50 text-indigo-700 shadow-sm' 
         : highlight 
-          ? 'text-indigo-600 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100'
-          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+          ? 'text-indigo-600 bg-white border border-indigo-200 hover:bg-indigo-50 shadow-sm'
+          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
     }`}
   >
     {icon}
@@ -1255,7 +1511,7 @@ const CoreRequirementsView = () => (
 // --- NEW COMPONENTS ---
 
 const ArchitectureView = () => (
-  <div className="space-y-8">
+  <div className="space-y-8 animate-in fade-in duration-300">
     <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
       <h2 className="text-2xl font-bold text-slate-900 mb-6">总体架构设计</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
