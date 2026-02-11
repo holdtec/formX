@@ -4,6 +4,8 @@
 
 > 专业级表单 / Cell Runtime 引擎。不仅仅是表单库，而是账务交互与计算执行层 Runtime。 Powered by @enginx.
 
+[📖 在线文档](https://holdtec.github.io/formX/) | [📦 GitHub 仓库](https://github.com/holdtec/formX.git)
+
 ## 🚀 项目定位
 
 formx 是一个 **Schema 驱动**、**可插拔**、**框架无关** 的复杂表单运行时引擎。旨在解决企业级应用（ERP, CRM, WMS）中复杂的字段联动、嵌套数据计算（如明细表）、多端逻辑复用等痛点。

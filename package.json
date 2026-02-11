@@ -1,6 +1,6 @@
 {
   "name": "@enginx/formx-core",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "Headless computation kernel for complex enterprise forms. Framework agnostic.",
   "type": "module",
   "private": false,

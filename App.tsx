@@ -43,6 +43,16 @@ export function App() {
               <TabButton id="ui" label="UI 规范" icon={<LayoutGrid className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
               <TabButton id="plan" label="计划" icon={<GitMerge className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
             </div>
+            <div className="w-px h-5 bg-slate-200 mx-2 hidden md:block"></div>
+            <a 
+              href="https://github.com/holdtec/formX.git" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+              title="GitHub Repository"
+            >
+              <Github className="w-5 h-5" />
+            </a>
           </div>
         </div>
       </header>
@@ -68,7 +78,8 @@ export function App() {
               © 2024 @enginx organization. Open source under MIT License.
             </p>
             <div className="flex justify-center space-x-6 text-slate-400">
-               <a href="#" className="hover:text-slate-600 transition-colors"><Github className="w-5 h-5"/></a>
+               <a href="https://github.com/holdtec/formX.git" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 transition-colors"><Github className="w-5 h-5"/></a>
+               <a href="https://holdtec.github.io/formX/" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 transition-colors"><BookOpen className="w-5 h-5"/></a>
                <a href="#" className="hover:text-slate-600 transition-colors"><Share2 className="w-5 h-5"/></a>
             </div>
           </div>
@@ -117,6 +128,15 @@ const LandingPageView = ({ onNavigate }: { onNavigate: (tab: any) => void }) => 
                <BookOpen className="w-5 h-5 mr-2" />
                阅读文档
             </button>
+            <a 
+              href="https://github.com/holdtec/formX.git" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-lg shadow-xl shadow-slate-200 transition-all hover:scale-105 flex items-center justify-center"
+            >
+               <Github className="w-5 h-5 mr-2" />
+               GitHub
+            </a>
          </div>
          
          {/* Tech Stack Badges */}
@@ -804,6 +824,16 @@ const DocsView = () => {
                <div className="pt-4 pb-2 px-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Reference</div>
                <DocNavItem id="api" label="API 参考" active={activeDocTab} onClick={setActiveDocTab} icon={<Braces className="w-4 h-4"/>} />
                <DocNavItem id="schema" label="Schema 定义" active={activeDocTab} onClick={setActiveDocTab} icon={<FileJson className="w-4 h-4"/>} />
+               <div className="pt-4 pb-2 px-3 text-xs font-bold text-slate-400 uppercase tracking-wider">External</div>
+               <a 
+                 href="https://holdtec.github.io/formX/" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
+               >
+                 <Share2 className="w-4 h-4"/>
+                 <span>完整文档站点</span>
+               </a>
             </nav>
          </div>
       </div>
