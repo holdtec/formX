@@ -1140,7 +1140,7 @@ const DocArchitecture = () => (
                <div className="mt-1"><LayoutGrid className="w-4 h-4 text-purple-600"/></div>
                <div>
                   <h4 className="text-sm font-bold text-slate-800">UI Layer</h4>
-                  <p className="text-sm text-slate-600">哑组件。只负责 <code>subscribe(path)</code> 并渲染。不包含任何 <code>if (a > b)</code> 这样的业务逻辑。</p>
+                  <p className="text-sm text-slate-600">哑组件。只负责 <code>subscribe(path)</code> 并渲染。不包含任何 <code>if (a &gt; b)</code> 这样的业务逻辑。</p>
                </div>
             </li>
          </ul>
