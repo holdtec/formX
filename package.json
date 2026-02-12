@@ -1,6 +1,6 @@
 {
   "name": "@enginx/formx-core",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0",
   "description": "Headless computation kernel for complex enterprise forms. Framework agnostic.",
   "type": "module",
   "private": false,
@@ -24,7 +24,6 @@
     "preview": "vite preview",
     "prepublishOnly": "npm run build:lib"
   },
-  "dependencies": {},
   "peerDependencies": {
     "react": ">=18.0.0"
   },
@@ -38,11 +37,13 @@
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/ui": "^4.0.18",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "typescript": "^5.3.3",
     "vite": "^5.1.6",
-    "vite-plugin-dts": "^3.7.3"
+    "vite-plugin-dts": "^3.7.3",
+    "vitest": "^4.0.18"
   }
 }

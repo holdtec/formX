@@ -9,6 +9,7 @@ coverage
 # Production
 build
 dist
+dist-lib
 
 # Misc
 .DS_Store

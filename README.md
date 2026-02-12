@@ -16,7 +16,9 @@ formx 是一个 **Schema 驱动**、**可插拔**、**框架无关** 的复杂�
 
 *   **Headless (无头架构)**: 核心逻辑不依赖 React/Vue，一套内核驱动 Web、Mobile、小程序多端。
 *   **Schema Driven (配置驱动)**: 通过 JSON 声明字段、布局、行为和计算逻辑。
-*   **Smart Computation (智能计算)**: 内置 DAG (有向无环图) 依赖追踪，自动处理 `A = B + C` 类型的联动，防止循环依赖。
+*   **Smart Computation (智能计算)**: 内置 DAG (有向无环图) 依赖追踪，自动处理 `A = B + C` 类型的联动。
+*   **Safe Mode (安全模式)**: **默认开启**。内置递归下降解析器，不使用 `eval` 或 `new Function`，完美兼容微信小程序及 CSP 环境。
+*   **Robustness (稳健性)**: 内置死循环检测、最大递归深度熔断 (Recursion Guard) 和浮点数震荡保护 (Epsilon Check)。
 *   **High Performance (高性能)**: 精确更新机制，仅重算受影响的节点，轻松支撑 1000+ 行明细数据。
 *   **Card Model (卡片模型)**: 专为复杂的嵌套数据结构设计，支持 List -> Card -> Section -> Fields 的层级。
 *   **Framework Agnostic**: 核心库零依赖，适配层可对接 Zustand, Redux, Pinia 等。
@@ -54,7 +56,8 @@ graph TD
 ```
 .
 ├── lib/
-│   ├── core.ts       # 核心运行时引擎 (依赖追踪、计算逻辑)
+│   ├── core.ts       # 核心运行时引擎 (DAG, Safe Eval, Cycle Check)
+│   ├── graph.ts      # 依赖图算法
 │   ├── store.ts      # 状态管理适配器 (Vanilla/Zustand 实现)
 │   └── ...
 ├── types.ts          # TypeScript 类型定义 (Schema, Runtime)
@@ -62,6 +65,20 @@ graph TD
 ├── index.tsx         # 入口文件
 └── ...
 ```
+
+## 🎯 适用场景
+
+**推荐使用 Formx：**
+- 复杂 B 端单据（字段 > 50，嵌套表格，跨字段联动）
+- 多端业务统一（Web / App / 小程序逻辑一致）
+- 低代码/配置化平台（后端下发 JSON 动态渲染）
+- 财务/计费系统（金额计算、汇率转换、合计汇总）
+
+**建议使用其他方案：**
+- 简单登录/注册页（2-3 个字段）→ React Hook Form
+- 重度 UI 定制（动画为主，逻辑简单）→ 原生表单
+
+👉 [查看完整技术选型对比](https://holdtec.github.io/formX/)
 
 ## ⚡️ 快速开始
 
@@ -76,7 +93,7 @@ const schema = [
     type: 'MONETARY', 
     label: '总价',
     read_only: true,
-    expression: 'price * quantity' // 自动联动计算
+    expression: 'price * quantity' // 自动联动计算 (Safe Mode)
   }
 ];
 ```
@@ -106,10 +123,23 @@ const price = useSyncExternalStore(
 />
 ```
 
+## 🛡 安全与稳定性
+
+为了在生产环境中提供极高的可靠性，Formx 内置了多重防护机制：
+
+1.  **Safe Evaluation**: 抛弃 `new Function`，使用内置的 AST 解析器执行表达式。
+    *   ✅ 兼容微信小程序
+    *   ✅ 兼容严格 CSP 策略
+    *   ✅ 防止任意代码执行攻击
+2.  **Cycle Detection**: 启动时自动检测 Schema 中的循环依赖 (A -> B -> A)，并输出警告。
+3.  **Recursion Guard**: 运行时检测递归深度，超过阈值（默认 50 层）自动熔断，防止浏览器卡死。
+4.  **Epsilon Check**: 针对 JavaScript 浮点数精度问题（0.1 + 0.2 !== 0.3）进行容差处理，防止震荡更新。
+5.  **Invalid Value Handling**: 自动处理无效值，`null`、`NaN`、`undefined`、`"NA"` 等均安全转换为 `0`，不会导致计算错误。
+
 ## 🛠 开发计划
 
 - [x] **Phase 1: 核心内核** - Schema 定义, 基础 Store 接口, 简单联动.
-- [ ] **Phase 2: 计算引擎** - 完整 DAG 算法, AST 表达式解析, 循环依赖检测.
+- [x] **Phase 2: 计算引擎** - 完整 DAG 算法, Safe Eval 解析器, 循环依赖检测, 聚合计算(SUM).
 - [ ] **Phase 3: 高级 UI** - 虚拟滚动, 复杂嵌套表格, 维度选择器.
 - [ ] **Phase 4: 生态扩展** - 插件系统, 远程函数注入.
 
