@@ -385,10 +385,10 @@ const DocExpressions = () => (
       <div>
          <div className="flex items-center space-x-3 mb-2">
             <h2 className="text-2xl font-bold text-slate-900">公式与计算手册</h2>
-            <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded border border-emerald-200 uppercase">Phase 2 Ready</span>
+            <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded border border-emerald-200 uppercase">v2.0 Shunting-yard</span>
          </div>
          <p className="text-slate-600 leading-relaxed">
-            Formx 内置了一个轻量级、安全的计算引擎。通过 <code>expression</code> 属性，你可以定义字段间的联动逻辑。
+            Formx v2.0 采用 <b>Shunting-yard 算法</b> 实现表达式解析，将中缀表达式转为后缀表达式（RPN）执行。安全高效，无死循环风险。
          </p>
       </div>
 
@@ -398,52 +398,59 @@ const DocExpressions = () => (
             <div>
                <h4 className="font-bold text-amber-800 text-sm">Safe Evaluation Mode (安全模式)</h4>
                <p className="text-sm text-amber-700 mt-1">
-                  为了兼容小程序等不允许使用 <code>new Function</code> 或 <code>eval</code> 的环境，Formx v1.2+ 
-                  <b>默认开启安全模式</b>。这意味着你只能使用<b>受支持的语法子集</b>。
+                  使用 Shunting-yard 算法解析表达式，不依赖 <code>new Function</code> 或 <code>eval</code>。
+                  完美兼容微信小程序、支付宝小程序及 CSP 安全环境。<b>无死循环风险</b>。
                </p>
             </div>
          </div>
       </div>
 
       <section className="space-y-4">
-          <h3 className="font-bold text-slate-800 text-lg border-b border-slate-100 pb-2">运行模式说明</h3>
+          <h3 className="font-bold text-slate-800 text-lg border-b border-slate-100 pb-2">Shunting-yard 算法优势</h3>
           <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-              <h4 className="font-bold text-sm text-slate-800 mb-2">如何开启 Safe Mode?</h4>
-              <p className="text-sm text-slate-600 leading-relaxed mb-3">
-                  <b>默认开启。</b> 无需任何配置。
-              </p>
-              <h4 className="font-bold text-sm text-slate-800 mb-2">为什么需要 Safe Mode?</h4>
-              <p className="text-sm text-slate-600 leading-relaxed mb-3">
-                  微信小程序、支付宝小程序以及许多企业级安全环境 (CSP) 禁止使用 <code>new Function</code> 和 <code>eval</code> 执行动态代码。
-                  为了确保核心内核 (Core Kernel) 能够一套代码多端运行，我们内置了一个递归下降解析器来处理表达式。
-              </p>
-              <div className="flex items-center space-x-2 text-xs font-bold text-emerald-700 uppercase tracking-wider mt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-white p-3 rounded border border-slate-100">
+                      <h4 className="font-bold text-sm text-slate-800 mb-2">✅ 安全可靠</h4>
+                      <p className="text-xs text-slate-600">不使用 eval/new Function，防止任意代码执行攻击。</p>
+                  </div>
+                  <div className="bg-white p-3 rounded border border-slate-100">
+                      <h4 className="font-bold text-sm text-slate-800 mb-2">✅ 无死循环</h4>
+                      <p className="text-xs text-slate-600">确定性算法，不存在正则替换导致的无限循环风险。</p>
+                  </div>
+                  <div className="bg-white p-3 rounded border border-slate-100">
+                      <h4 className="font-bold text-sm text-slate-800 mb-2">✅ 正确优先级</h4>
+                      <p className="text-xs text-slate-600">自动处理运算符优先级和括号嵌套。</p>
+                  </div>
+                  <div className="bg-white p-3 rounded border border-slate-100">
+                      <h4 className="font-bold text-sm text-slate-800 mb-2">✅ 嵌套函数</h4>
+                      <p className="text-xs text-slate-600">支持 Math.pow(Math.abs(x), 2) 等嵌套调用。</p>
+                  </div>
+              </div>
+              <div className="flex items-center space-x-2 text-xs font-bold text-emerald-700 uppercase tracking-wider mt-4">
                   <span className="px-2 py-1 bg-emerald-100 rounded border border-emerald-200">Zero Configuration</span>
                   <span className="px-2 py-1 bg-emerald-100 rounded border border-emerald-200">MiniProgram Ready</span>
+                  <span className="px-2 py-1 bg-emerald-100 rounded border border-emerald-200">CSP Compatible</span>
               </div>
           </div>
       </section>
 
       <section className="space-y-6">
-         <h3 className="font-bold text-slate-800 text-lg border-b border-slate-100 pb-2">支持的语法</h3>
+         <h3 className="font-bold text-slate-800 text-lg border-b border-slate-100 pb-2">支持的运算符</h3>
          
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                <h4 className="font-bold text-sm text-slate-700 mb-3 flex items-center">
                   <Calculator className="w-4 h-4 mr-2 text-indigo-500"/> 算术运算
                </h4>
                <ul className="space-y-2 text-sm text-slate-600">
                   <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
-                     <code>+</code> <span>加法</span>
+                     <code>+ - * /</code> <span>四则运算</span>
                   </li>
                   <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
-                     <code>-</code> <span>减法</span>
+                     <code>%</code> <span>取模</span>
                   </li>
                   <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
-                     <code>*</code> <span>乘法</span>
-                  </li>
-                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
-                     <code>/</code> <span>除法</span>
+                     <code>^</code> <span>幂运算</span>
                   </li>
                   <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
                      <code>( )</code> <span>括号优先级</span>
@@ -453,25 +460,118 @@ const DocExpressions = () => (
 
             <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                <h4 className="font-bold text-sm text-slate-700 mb-3 flex items-center">
-                  <Database className="w-4 h-4 mr-2 text-purple-500"/> 变量引用
+                  <GitMerge className="w-4 h-4 mr-2 text-purple-500"/> 比较运算
                </h4>
-               <p className="text-sm text-slate-600 mb-4">
-                  直接使用字段的 <code>key</code> 作为变量名。引擎会自动解析依赖。
-               </p>
-               <div className="space-y-3">
-                  <div>
-                     <div className="text-xs font-bold text-slate-500 mb-1">同级引用:</div>
-                     <div className="bg-slate-50 p-2 rounded text-xs font-mono text-slate-700">
-                        price * quantity
-                     </div>
-                  </div>
-                  <div>
-                     <div className="text-xs font-bold text-slate-500 mb-1">聚合函数:</div>
-                     <div className="bg-slate-50 p-2 rounded text-xs font-mono text-slate-700">
-                        SUM(items.amount)
-                     </div>
-                  </div>
+               <ul className="space-y-2 text-sm text-slate-600">
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>&gt; &lt;</code> <span>大于/小于</span>
+                  </li>
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>&gt;= &lt;=</code> <span>大于等于/小于等于</span>
+                  </li>
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>== !=</code> <span>等于/不等于</span>
+                  </li>
+               </ul>
+            </div>
+
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+               <h4 className="font-bold text-sm text-slate-700 mb-3 flex items-center">
+                  <Zap className="w-4 h-4 mr-2 text-amber-500"/> 逻辑运算
+               </h4>
+               <ul className="space-y-2 text-sm text-slate-600">
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>&&amp;</code> <span>逻辑与</span>
+                  </li>
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>||</code> <span>逻辑或</span>
+                  </li>
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>!</code> <span>逻辑非</span>
+                  </li>
+               </ul>
+            </div>
+         </div>
+      </section>
+
+      <section className="space-y-6">
+         <h3 className="font-bold text-slate-800 text-lg border-b border-slate-100 pb-2">支持的函数</h3>
+         
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+               <h4 className="font-bold text-sm text-slate-700 mb-3 flex items-center">
+                  <Coins className="w-4 h-4 mr-2 text-emerald-500"/> Math 函数
+               </h4>
+               <ul className="space-y-2 text-sm text-slate-600">
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>Math.pow(a, b)</code> <span>幂运算</span>
+                  </li>
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>Math.round(x)</code> <span>四舍五入</span>
+                  </li>
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>Math.floor(x)</code> <span>向下取整</span>
+                  </li>
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>Math.ceil(x)</code> <span>向上取整</span>
+                  </li>
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>Math.abs(x)</code> <span>绝对值</span>
+                  </li>
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>Math.max/min(a,b)</code> <span>最大/最小值</span>
+                  </li>
+               </ul>
+            </div>
+
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+               <h4 className="font-bold text-sm text-slate-700 mb-3 flex items-center">
+                  <GitMerge className="w-4 h-4 mr-2 text-indigo-500"/> 业务函数
+               </h4>
+               <ul className="space-y-2 text-sm text-slate-600">
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>IF(cond, t, f)</code> <span>条件判断</span>
+                  </li>
+                  <li className="flex justify-between items-center bg-slate-50 p-2 rounded">
+                     <code>SUM(list.field)</code> <span>聚合求和</span>
+                  </li>
+               </ul>
+               <div className="mt-4 p-3 bg-indigo-50 rounded border border-indigo-100">
+                   <div className="text-xs font-bold text-indigo-700 mb-1">嵌套 IF 示例:</div>
+                   <code className="text-xs text-indigo-600">IF(level=="VIP", 0.8, IF(level=="Gold", 0.9, 1))</code>
                </div>
+            </div>
+         </div>
+      </section>
+
+      <section className="space-y-4">
+         <h3 className="font-bold text-slate-800 text-lg border-b border-slate-100 pb-2">表达式示例</h3>
+         <div className="bg-slate-900 rounded-lg p-4 text-white font-mono text-xs overflow-x-auto">
+            <div className="space-y-2">
+               <div className="flex items-start gap-3">
+                   <span className="text-slate-500">// 基础计算</span>
+               </div>
+               <div className="text-emerald-400">expression: 'price * quantity'</div>
+               <div className="flex items-start gap-3 mt-3">
+                   <span className="text-slate-500">// 复利计算</span>
+               </div>
+               <div className="text-emerald-400">expression: 'principal * Math.pow(1 + rate/100, years)'</div>
+               <div className="flex items-start gap-3 mt-3">
+                   <span className="text-slate-500">// 条件折扣</span>
+               </div>
+               <div className="text-emerald-400">expression: 'IF(amount &gt; 10000, amount * 0.9, amount)'</div>
+               <div className="flex items-start gap-3 mt-3">
+                   <span className="text-slate-500">// 多级条件</span>
+               </div>
+               <div className="text-emerald-400">expression: 'IF(level == "gold", 20, IF(level == "silver", 10, 5))'</div>
+               <div className="flex items-start gap-3 mt-3">
+                   <span className="text-slate-500">// 逻辑组合</span>
+               </div>
+               <div className="text-emerald-400">expression: 'IF(age &gt;= 18 &amp;&amp; income &gt; 5000, 1, 0)'</div>
+               <div className="flex items-start gap-3 mt-3">
+                   <span className="text-slate-500">// 聚合计算</span>
+               </div>
+               <div className="text-emerald-400">expression: 'SUM(items.amount)'</div>
             </div>
          </div>
       </section>
