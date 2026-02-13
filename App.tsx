@@ -19,6 +19,8 @@ import { FormxReactDemoView } from './views/FormxReactDemoView';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'core' | 'ui' | 'plan' | 'demo' | 'docs' | 'react-demo'>('home');
+  const currentYear = new Date().getFullYear();
+  const copyrightYear = currentYear === 2026 ? '2026' : `2026-${currentYear}`;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -89,7 +91,7 @@ export function App() {
                <span>formx</span>
             </div>
             <p className="text-slate-500 text-sm mb-6">
-              © 2026-{new Date().getFullYear()} @enginx organization. Open source under MIT License.
+              © {copyrightYear} @enginx organization. Open source under MIT License.
             </p>
             <div className="flex justify-center space-x-6 text-slate-400">
                <a href="https://github.com/holdtec/formX.git" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 transition-colors"><Github className="w-5 h-5"/></a>
