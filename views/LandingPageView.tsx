@@ -23,7 +23,7 @@ export const LandingPageView = ({ onNavigate }: { onNavigate: (tab: any) => void
          
          <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-bold mb-8 animate-bounce-slow">
             <Sparkles className="w-3 h-3 mr-2" />
-            v1.0.0-beta is now available
+            v2.0.0 is now available
          </div>
          
          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 leading-tight">
