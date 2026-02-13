@@ -64,10 +64,11 @@ export function App() {
               href="https://github.com/holdtec/formX.git" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+              className="flex items-center gap-2 px-3 py-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
               title="GitHub Repository"
             >
               <Github className="w-5 h-5" />
+              <span className="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">v2.0</span>
             </a>
           </div>
         </div>

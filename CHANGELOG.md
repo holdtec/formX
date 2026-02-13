@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.0] - 2026-02-13
 
 ### Added
 - Shunting-yard 算法实现安全表达式解析
@@ -13,10 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 支持比较运算符: `>`, `<`, `>=`, `<=`, `==`, `!=`
 - 支持逻辑运算符: `&&`, `||`, `!`
 - 支持 IF 条件函数
-
-## [1.1.0] - 2026-02-XX
-
-### Added
 - 新增 `@enginx/formx-react` 独立组件包
   - `FormProvider` 上下文组件
   - `FormField` 字段渲染组件

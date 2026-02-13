@@ -1280,7 +1280,7 @@ export const FormxReactDemoView = () => {
           </div>
           <div className="text-right">
             <div className="text-xs text-indigo-200">版本</div>
-            <div className="text-lg font-bold">1.0.0</div>
+            <div className="text-lg font-bold">2.0.0</div>
           </div>
         </div>
       </div>
