@@ -8,16 +8,17 @@ import {
   Table, List, Braces, MousePointerClick, Home, Share2, Sparkles, Github
 } from 'lucide-react';
 
-import { TabButton } from './components/Shared';
+import { TabButton, DropdownTab } from './components/Shared';
 import { LandingPageView } from './views/LandingPageView';
 import { CoreRequirementsView } from './views/CoreRequirementsView';
 import { UiSpecsView } from './views/UiSpecsView';
 import { PlanView } from './views/PlanView';
 import { DocsView } from './views/DocsView';
 import { KernelDemoView } from './views/KernelDemoView';
+import { FormxReactDemoView } from './views/FormxReactDemoView';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'core' | 'ui' | 'plan' | 'demo' | 'docs'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'core' | 'ui' | 'plan' | 'demo' | 'docs' | 'react-demo'>('home');
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -39,10 +40,19 @@ export function App() {
           <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar py-2 pl-4">
             <TabButton id="home" label="首页" icon={<Home className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
             <div className="w-px h-5 bg-slate-200 mx-2 hidden md:block"></div>
-            <TabButton id="demo" label="演示" icon={<Play className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} highlight />
+            <DropdownTab 
+              label="演示" 
+              icon={<Play className="w-4 h-4" />} 
+              active={activeTab} 
+              onClick={setActiveTab}
+              items={[
+                { id: 'react-demo', label: 'React 组件', icon: <Package className="w-4 h-4" /> },
+                { id: 'demo', label: '内核演示', icon: <Cpu className="w-4 h-4" /> }
+              ]}
+            />
             <TabButton id="docs" label="文档" icon={<BookOpen className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
-            {/* Secondary tabs hidden on mobile or shown in dropdown in real app, keeping simple here */}
             <div className="hidden lg:flex space-x-1">
+              <div className="w-px h-5 bg-slate-200 mx-2 hidden md:block"></div>
               <TabButton id="core" label="核心需求" icon={<Code className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
               <TabButton id="ui" label="UI 规范" icon={<LayoutGrid className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
               <TabButton id="plan" label="计划" icon={<GitMerge className="w-4 h-4" />} active={activeTab} onClick={setActiveTab} />
@@ -68,6 +78,7 @@ export function App() {
         {activeTab === 'plan' && <PlanView />}
         {activeTab === 'docs' && <DocsView />}
         {activeTab === 'demo' && <KernelDemoView />}
+        {activeTab === 'react-demo' && <FormxReactDemoView />}
       </main>
       
       {activeTab === 'home' && (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 export const TabButton = ({ id, label, icon, active, onClick, highlight }: any) => (
   <button
@@ -15,6 +15,93 @@ export const TabButton = ({ id, label, icon, active, onClick, highlight }: any) 
     <span>{label}</span>
   </button>
 );
+
+export const DropdownTab = ({ label, icon, items, active, onClick }: any) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  
+  const isActive = items.some((item: any) => active === item.id);
+  
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(event.target as Node) &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleToggle = () => {
+    if (!isOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + 4,
+        left: rect.left
+      });
+    }
+    setIsOpen(!isOpen);
+  };
+  
+  return (
+    <>
+      <div ref={dropdownRef}>
+        <button
+          onClick={handleToggle}
+          className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+            isActive 
+              ? 'bg-indigo-50 text-indigo-700 shadow-sm' 
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+          }`}
+        >
+          {icon}
+          <span>{label}</span>
+          <svg 
+            className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+      
+      {isOpen && (
+        <div 
+          ref={menuRef}
+          className="fixed bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50"
+          style={{ top: position.top, left: position.left, width: '180px' }}
+        >
+          {items.map((item: any) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                onClick(item.id);
+                setIsOpen(false);
+              }}
+              className={`w-full flex items-center space-x-2 px-4 py-2 text-sm transition-colors ${
+                active === item.id 
+                  ? 'bg-indigo-50 text-indigo-700' 
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
+};
 
 export const RequirementCard = ({ title, icon, description, children }: any) => (
   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-full">
