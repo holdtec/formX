@@ -292,7 +292,7 @@ function EnumField({ value, onChange, disabled, readOnly, field }: FieldRenderPr
   );
 }
 
-function RadioField({ value, onChange, disabled, readOnly, field }: FieldRenderProps) {
+function RadioField({ value, onChange, disabled, readOnly: _readOnly, field }: FieldRenderProps) {
   const options = (field as any)?.options || [];
   const direction = (field as any)?.direction || 'vertical';
 
@@ -323,7 +323,7 @@ function RadioField({ value, onChange, disabled, readOnly, field }: FieldRenderP
   );
 }
 
-function CheckboxGroupField({ value, onChange, disabled, readOnly, field }: FieldRenderProps) {
+function CheckboxGroupField({ value, onChange, disabled, readOnly: _readOnly, field }: FieldRenderProps) {
   const options = (field as any)?.options || [];
   const selectedValues = Array.isArray(value) ? value : [];
 
@@ -354,7 +354,7 @@ function CheckboxGroupField({ value, onChange, disabled, readOnly, field }: Fiel
   );
 }
 
-function SliderField({ value, onChange, disabled, readOnly, field }: FieldRenderProps) {
+function SliderField({ value, onChange, disabled, readOnly: _readOnly, field }: FieldRenderProps) {
   const min = (field as any)?.min || 0;
   const max = (field as any)?.max || 100;
   const step = (field as any)?.step || 1;
@@ -383,7 +383,7 @@ function SliderField({ value, onChange, disabled, readOnly, field }: FieldRender
   );
 }
 
-function DateField({ value, onChange, disabled, readOnly, placeholder, field }: FieldRenderProps) {
+function DateField({ value, onChange, disabled, readOnly, placeholder: _placeholder, field: _field }: FieldRenderProps) {
   const style = {
     ...defaultStyles.input,
     ...(disabled ? defaultStyles.inputDisabled : {}),
@@ -400,7 +400,7 @@ function DateField({ value, onChange, disabled, readOnly, placeholder, field }: 
   });
 }
 
-function DateTimeField({ value, onChange, disabled, readOnly, placeholder, field }: FieldRenderProps) {
+function DateTimeField({ value, onChange, disabled, readOnly, placeholder: _placeholder, field: _field }: FieldRenderProps) {
   const style = {
     ...defaultStyles.input,
     ...(disabled ? defaultStyles.inputDisabled : {}),
@@ -417,7 +417,7 @@ function DateTimeField({ value, onChange, disabled, readOnly, placeholder, field
   });
 }
 
-function DimensionField({ value, onChange, disabled, readOnly, field }: FieldRenderProps) {
+function DimensionField({ value, onChange, disabled, readOnly: _readOnly, field }: FieldRenderProps) {
   const levels = (field as any)?.levels || [];
   const [openLevel, setOpenLevel] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -564,7 +564,7 @@ function RatingField({ value, onChange, disabled, readOnly, field }: FieldRender
   );
 }
 
-function ColorField({ value, onChange, disabled, readOnly, field }: FieldRenderProps) {
+function ColorField({ value, onChange, disabled, readOnly: _readOnly, field: _field }: FieldRenderProps) {
   return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
     React.createElement('input', {
       type: 'color',
@@ -595,7 +595,7 @@ function ColorField({ value, onChange, disabled, readOnly, field }: FieldRenderP
   );
 }
 
-function FileField({ value, onChange, disabled, readOnly, field }: FieldRenderProps) {
+function FileField({ value, onChange, disabled, readOnly: _readOnly, field }: FieldRenderProps) {
   const accept = (field as any)?.accept || '*';
   const multiple = (field as any)?.multiple || false;
   const files = Array.isArray(value) ? value : value ? [value] : [];
