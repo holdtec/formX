@@ -28,9 +28,11 @@ const PRECEDENCE: Record<string, number> = {
   '+': 5, '-': 5,
   '*': 6, '/': 6, '%': 6,
   '^': 7,
-  '!': 8, // Unary NOT
-  'u-': 9 // Unary minus (internal representation)
+  'u-': 8,
+  '!': 9
 };
+
+const RIGHT_ASSOCIATIVE = new Set(['^', 'u-', '!']);
 
 export class RuntimeEngine {
   private schema: Map<string, FieldSchema>;
@@ -324,15 +326,17 @@ export class RuntimeEngine {
         
         const currentOpValue = isUnary ? 'u-' : token.value;
         const currentPrec = PRECEDENCE[currentOpValue] || 0;
+        const isRightAssoc = RIGHT_ASSOCIATIVE.has(currentOpValue);
 
         while (operatorStack.length > 0) {
           const top = operatorStack[operatorStack.length - 1];
           if (top.type === 'LPAREN') break;
           
           const topPrec = PRECEDENCE[top.value] || 0;
-          // Associativity: standard math is Left-to-Right (except exponentiation)
-          // If precedence of top is >= current, pop.
-          if (topPrec >= currentPrec) {
+          // For right-associative operators, only pop if top has higher precedence
+          // For left-associative operators, pop if top has >= precedence
+          const shouldPop = isRightAssoc ? (topPrec > currentPrec) : (topPrec >= currentPrec);
+          if (shouldPop) {
              outputQueue.push(operatorStack.pop()!);
           } else {
             break;

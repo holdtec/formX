@@ -488,4 +488,256 @@ describe('RuntimeEngine (Safe Mode)', () => {
     });
   });
 
+  describe('Complex Expressions (v2.0)', () => {
+    it('should handle chained arithmetic with multiple operators', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'c', type: 'NUMBER', label: 'C' },
+        { key: 'd', type: 'NUMBER', label: 'D' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a + b * c - d / 2' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 5, c: 2, d: 8, res: 0 });
+      expect(store.getState().res).toBe(16);
+    });
+
+    it('should handle deeply nested parentheses', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'c', type: 'NUMBER', label: 'C' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: '((a + (b * 2)) - c) / 3' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 5, c: 4, res: 0 });
+      expect(store.getState().res).toBe(16 / 3);
+    });
+
+    it('should handle mixed comparison and arithmetic', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'BOOLEAN', label: 'Res', expression: '(a + b) > 10 && a < 20' }
+      ];
+      const { store } = setupEngine(schema, { a: 5, b: 10, res: false });
+      expect(store.getState().res).toBe(true);
+    });
+
+    it('should handle complex IF with arithmetic', () => {
+      const schema: FieldSchema[] = [
+        { key: 'price', type: 'NUMBER', label: 'Price' },
+        { key: 'qty', type: 'NUMBER', label: 'Qty' },
+        { key: 'discount', type: 'NUMBER', label: 'Discount', expression: 'IF(price * qty > 1000, 0.1, 0)' }
+      ];
+      const { store } = setupEngine(schema, { price: 500, qty: 3, discount: 0 });
+      expect(store.getState().discount).toBe(0.1);
+    });
+
+    it('should handle tax calculation scenario', () => {
+      const schema: FieldSchema[] = [
+        { key: 'subtotal', type: 'NUMBER', label: 'Subtotal' },
+        { key: 'taxRate', type: 'NUMBER', label: 'Tax Rate' },
+        { key: 'tax', type: 'NUMBER', label: 'Tax', expression: 'subtotal * taxRate / 100' },
+        { key: 'total', type: 'NUMBER', label: 'Total', expression: 'subtotal + tax' }
+      ];
+      const { store } = setupEngine(schema, { subtotal: 1000, taxRate: 13, tax: 0, total: 0 });
+      expect(store.getState().tax).toBe(130);
+      expect(store.getState().total).toBe(1130);
+    });
+
+    it('should handle chained dependency updates', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B', expression: 'a * 2' },
+        { key: 'c', type: 'NUMBER', label: 'C', expression: 'b + 10' },
+        { key: 'd', type: 'NUMBER', label: 'D', expression: 'c / 2' }
+      ];
+      const { engine, store } = setupEngine(schema, { a: 5, b: 0, c: 0, d: 0 });
+      engine.setValue('a', 10);
+      expect(store.getState().b).toBe(20);
+      expect(store.getState().c).toBe(30);
+      expect(store.getState().d).toBe(15);
+    });
+  });
+
+  describe('Edge Cases - Division & Zero (v2.0)', () => {
+    it('should handle division by zero gracefully', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a / b' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 0, res: 0 });
+      expect(store.getState().res).toBe(0);
+    });
+
+    it('should handle zero to negative power', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a ^ -1' }
+      ];
+      const { store } = setupEngine(schema, { a: 2, res: 0 });
+      expect(store.getState().res).toBe(0.5);
+    });
+
+    it('should handle very large numbers', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a * b' }
+      ];
+      const { store } = setupEngine(schema, { a: 1000000, b: 1000000, res: 0 });
+      expect(store.getState().res).toBe(1000000000000);
+    });
+
+    it('should handle very small decimals', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a * b' }
+      ];
+      const { store } = setupEngine(schema, { a: 0.001, b: 0.002, res: 0 });
+      expect(store.getState().res).toBeCloseTo(0.000002, 10);
+    });
+  });
+
+  describe('Edge Cases - Strings & Types (v2.0)', () => {
+    it('should handle empty string as 0', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'TEXT', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a + 5' }
+      ];
+      const { store } = setupEngine(schema, { a: '', res: 0 });
+      expect(store.getState().res).toBe(5);
+    });
+
+    it('should handle whitespace string as 0', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'TEXT', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a + 5' }
+      ];
+      const { store } = setupEngine(schema, { a: '   ', res: 0 });
+      expect(store.getState().res).toBe(5);
+    });
+
+    it('should handle N/A string as 0', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'TEXT', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a + 5' }
+      ];
+      const { store } = setupEngine(schema, { a: 'N/A', res: 0 });
+      expect(store.getState().res).toBe(5);
+    });
+
+    it('should parse numeric string correctly', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'TEXT', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a * 2' }
+      ];
+      const { store } = setupEngine(schema, { a: '50', res: 0 });
+      expect(store.getState().res).toBe(100);
+    });
+
+    it('should handle string with leading/trailing spaces', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'TEXT', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a + 10' }
+      ];
+      const { store } = setupEngine(schema, { a: '  20  ', res: 0 });
+      expect(store.getState().res).toBe(30);
+    });
+  });
+
+  describe('Edge Cases - Unary & Negative (v2.0)', () => {
+    it('should handle double negative', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: '--a' }
+      ];
+      const { store } = setupEngine(schema, { a: 5, res: 0 });
+      expect(store.getState().res).toBe(5);
+    });
+
+    it('should handle negative in parentheses', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: '(-a) + 10' }
+      ];
+      const { store } = setupEngine(schema, { a: 5, res: 0 });
+      expect(store.getState().res).toBe(5);
+    });
+
+    it('should handle unary minus with power', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: '-a ^ 2' }
+      ];
+      const { store } = setupEngine(schema, { a: 3, res: 0 });
+      expect(store.getState().res).toBe(9);
+    });
+
+    it('should handle subtraction vs unary minus', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a - -b' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 5, res: 0 });
+      expect(store.getState().res).toBe(15);
+    });
+  });
+
+  describe('Complex Business Scenarios (v2.0)', () => {
+    it('should calculate compound interest', () => {
+      const schema: FieldSchema[] = [
+        { key: 'principal', type: 'NUMBER', label: 'Principal' },
+        { key: 'rate', type: 'NUMBER', label: 'Rate' },
+        { key: 'years', type: 'NUMBER', label: 'Years' },
+        { key: 'amount', type: 'NUMBER', label: 'Amount', expression: 'principal * Math.pow(1 + rate / 100, years)' }
+      ];
+      const { store } = setupEngine(schema, { principal: 1000, rate: 5, years: 2, amount: 0 });
+      expect(store.getState().amount).toBeCloseTo(1102.5, 1);
+    });
+
+    it('should calculate tiered discount', () => {
+      const schema: FieldSchema[] = [
+        { key: 'amount', type: 'NUMBER', label: 'Amount' },
+        { key: 'discount', type: 'NUMBER', label: 'Discount', expression: 'IF(amount >= 10000, 0.2, IF(amount >= 5000, 0.1, IF(amount >= 1000, 0.05, 0)))' }
+      ];
+      const { store } = setupEngine(schema, { amount: 7500, discount: 0 });
+      expect(store.getState().discount).toBe(0.1);
+    });
+
+    it('should calculate profit margin', () => {
+      const schema: FieldSchema[] = [
+        { key: 'revenue', type: 'NUMBER', label: 'Revenue' },
+        { key: 'cost', type: 'NUMBER', label: 'Cost' },
+        { key: 'profit', type: 'NUMBER', label: 'Profit', expression: 'revenue - cost' },
+        { key: 'margin', type: 'NUMBER', label: 'Margin', expression: 'IF(revenue > 0, profit / revenue * 100, 0)' }
+      ];
+      const { store } = setupEngine(schema, { revenue: 1000, cost: 700, profit: 0, margin: 0 });
+      expect(store.getState().profit).toBe(300);
+      expect(store.getState().margin).toBe(30);
+    });
+
+    it('should handle invoice total with tax and discount', () => {
+      const schema: FieldSchema[] = [
+        { key: 'subtotal', type: 'NUMBER', label: 'Subtotal' },
+        { key: 'discountRate', type: 'NUMBER', label: 'Discount Rate' },
+        { key: 'taxRate', type: 'NUMBER', label: 'Tax Rate' },
+        { key: 'discount', type: 'NUMBER', label: 'Discount', expression: 'subtotal * discountRate / 100' },
+        { key: 'taxable', type: 'NUMBER', label: 'Taxable', expression: 'subtotal - discount' },
+        { key: 'tax', type: 'NUMBER', label: 'Tax', expression: 'taxable * taxRate / 100' },
+        { key: 'total', type: 'NUMBER', label: 'Total', expression: 'taxable + tax' }
+      ];
+      const { store } = setupEngine(schema, { 
+        subtotal: 1000, discountRate: 10, taxRate: 13, 
+        discount: 0, taxable: 0, tax: 0, total: 0 
+      });
+      expect(store.getState().discount).toBe(100);
+      expect(store.getState().taxable).toBe(900);
+      expect(store.getState().tax).toBe(117);
+      expect(store.getState().total).toBe(1017);
+    });
+  });
+
 });
