@@ -484,6 +484,11 @@ export class RuntimeEngine {
                 stack.push(Math.abs(a));
                 break;
             }
+            case 'SQRT': {
+                const a = stack.pop();
+                stack.push(Math.sqrt(a));
+                break;
+            }
             case 'IF': {
                 // IF(condition, trueVal, falseVal)
                 const falseVal = stack.pop();

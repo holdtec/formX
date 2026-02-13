@@ -342,6 +342,55 @@ describe('RuntimeEngine (Safe Mode)', () => {
       const { store } = setupEngine(schema, { a: 10, b: 20, res: 0 });
       expect(store.getState().res).toBe(10);
     });
+
+    it('should handle nested Math functions', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.round(Math.pow(a, 2))' }
+      ];
+      const { store } = setupEngine(schema, { a: 3.5, res: 0 });
+      expect(store.getState().res).toBe(12);
+    });
+
+    it('should handle Math.max with Math.min', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'c', type: 'NUMBER', label: 'C' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.max(Math.min(a, b), c)' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 20, c: 15, res: 0 });
+      expect(store.getState().res).toBe(15);
+    });
+
+    it('should handle Math.abs with Math.pow', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.abs(Math.pow(a, 3))' }
+      ];
+      const { store } = setupEngine(schema, { a: -2, res: 0 });
+      expect(store.getState().res).toBe(8);
+    });
+
+    it('should handle deeply nested Math functions', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.floor(Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2)))' }
+      ];
+      const { store } = setupEngine(schema, { a: 3, b: 4, res: 0 });
+      expect(store.getState().res).toBe(5);
+    });
+
+    it('should handle Math functions with expressions as arguments', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.max(a * 2, b + 5)' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 30, res: 0 });
+      expect(store.getState().res).toBe(35);
+    });
   });
 
   describe('Comparison Operators (v2.0)', () => {
