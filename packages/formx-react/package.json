@@ -1,6 +1,6 @@
 {
   "name": "@enginx/formx-react",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "React bindings for formx-core - Schema-driven dynamic form system",
   "type": "module",
   "private": false,
@@ -24,7 +24,7 @@
   },
   "peerDependencies": {
     "react": ">=18.0.0",
-    "@enginx/formx-core": ">=2.0.0"
+    "@enginx/formx-core": ">=1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
