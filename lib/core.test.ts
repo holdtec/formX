@@ -276,4 +276,216 @@ describe('RuntimeEngine (Safe Mode)', () => {
      });
   });
 
+  describe('Math Functions (v2.0)', () => {
+    it('should handle Math.pow', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.pow(a, b)' }
+      ];
+      const { store } = setupEngine(schema, { a: 2, b: 3, res: 0 });
+      expect(store.getState().res).toBe(8);
+    });
+
+    it('should handle Math.round', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.round(a)' }
+      ];
+      const { store } = setupEngine(schema, { a: 3.7, res: 0 });
+      expect(store.getState().res).toBe(4);
+    });
+
+    it('should handle Math.floor', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.floor(a)' }
+      ];
+      const { store } = setupEngine(schema, { a: 3.9, res: 0 });
+      expect(store.getState().res).toBe(3);
+    });
+
+    it('should handle Math.ceil', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.ceil(a)' }
+      ];
+      const { store } = setupEngine(schema, { a: 3.1, res: 0 });
+      expect(store.getState().res).toBe(4);
+    });
+
+    it('should handle Math.abs', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.abs(a)' }
+      ];
+      const { store } = setupEngine(schema, { a: -5, res: 0 });
+      expect(store.getState().res).toBe(5);
+    });
+
+    it('should handle Math.max', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.max(a, b)' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 20, res: 0 });
+      expect(store.getState().res).toBe(20);
+    });
+
+    it('should handle Math.min', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'Math.min(a, b)' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 20, res: 0 });
+      expect(store.getState().res).toBe(10);
+    });
+  });
+
+  describe('Comparison Operators (v2.0)', () => {
+    it('should handle > operator', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'BOOLEAN', label: 'Res', expression: 'a > b' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 5, res: false });
+      expect(store.getState().res).toBe(true);
+    });
+
+    it('should handle < operator', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'BOOLEAN', label: 'Res', expression: 'a < b' }
+      ];
+      const { store } = setupEngine(schema, { a: 5, b: 10, res: false });
+      expect(store.getState().res).toBe(true);
+    });
+
+    it('should handle >= operator', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'BOOLEAN', label: 'Res', expression: 'a >= b' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 10, res: false });
+      expect(store.getState().res).toBe(true);
+    });
+
+    it('should handle <= operator', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'BOOLEAN', label: 'Res', expression: 'a <= b' }
+      ];
+      const { store } = setupEngine(schema, { a: 5, b: 5, res: false });
+      expect(store.getState().res).toBe(true);
+    });
+
+    it('should handle == operator', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'BOOLEAN', label: 'Res', expression: 'a == b' }
+      ];
+      const { store } = setupEngine(schema, { a: 5, b: 5, res: false });
+      expect(store.getState().res).toBe(true);
+    });
+
+    it('should handle != operator', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'BOOLEAN', label: 'Res', expression: 'a != b' }
+      ];
+      const { store } = setupEngine(schema, { a: 5, b: 10, res: false });
+      expect(store.getState().res).toBe(true);
+    });
+  });
+
+  describe('Logical Operators (v2.0)', () => {
+    it('should handle && operator', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'BOOLEAN', label: 'A' },
+        { key: 'b', type: 'BOOLEAN', label: 'B' },
+        { key: 'res', type: 'BOOLEAN', label: 'Res', expression: 'a && b' }
+      ];
+      const { store } = setupEngine(schema, { a: true, b: true, res: false });
+      expect(store.getState().res).toBe(true);
+    });
+
+    it('should handle || operator', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'BOOLEAN', label: 'A' },
+        { key: 'b', type: 'BOOLEAN', label: 'B' },
+        { key: 'res', type: 'BOOLEAN', label: 'Res', expression: 'a || b' }
+      ];
+      const { store } = setupEngine(schema, { a: false, b: true, res: false });
+      expect(store.getState().res).toBe(true);
+    });
+
+    it('should handle ! operator', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'BOOLEAN', label: 'A' },
+        { key: 'res', type: 'BOOLEAN', label: 'Res', expression: '!a' }
+      ];
+      const { store } = setupEngine(schema, { a: true, res: false });
+      expect(store.getState().res).toBe(false);
+    });
+  });
+
+  describe('IF Function (v2.0)', () => {
+    it('should return true branch when condition is true', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'IF(a > 10, 100, 0)' }
+      ];
+      const { store } = setupEngine(schema, { a: 15, res: 0 });
+      expect(store.getState().res).toBe(100);
+    });
+
+    it('should return false branch when condition is false', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'IF(a > 10, 100, 0)' }
+      ];
+      const { store } = setupEngine(schema, { a: 5, res: 0 });
+      expect(store.getState().res).toBe(0);
+    });
+
+    it('should handle nested IF', () => {
+      const schema: FieldSchema[] = [
+        { key: 'score', type: 'NUMBER', label: 'Score' },
+        { key: 'grade', type: 'TEXT', label: 'Grade', expression: 'IF(score >= 90, "A", IF(score >= 80, "B", "C"))' }
+      ];
+      const { store } = setupEngine(schema, { score: 85, grade: '' });
+      expect(store.getState().grade).toBe('B');
+    });
+  });
+
+  describe('Additional Operators (v2.0)', () => {
+    it('should handle modulo operator %', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a % b' }
+      ];
+      const { store } = setupEngine(schema, { a: 10, b: 3, res: 0 });
+      expect(store.getState().res).toBe(1);
+    });
+
+    it('should handle power operator ^', () => {
+      const schema: FieldSchema[] = [
+        { key: 'a', type: 'NUMBER', label: 'A' },
+        { key: 'b', type: 'NUMBER', label: 'B' },
+        { key: 'res', type: 'NUMBER', label: 'Res', expression: 'a ^ b' }
+      ];
+      const { store } = setupEngine(schema, { a: 2, b: 3, res: 0 });
+      expect(store.getState().res).toBe(8);
+    });
+  });
+
 });
