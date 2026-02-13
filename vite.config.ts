@@ -1,10 +1,16 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './', // 使用相对路径，确保在 GitHub Pages 非根目录下也能正常加载资源
+  base: './',
+  resolve: {
+    alias: {
+      '@enginx/formx-core': resolve(__dirname, './lib/index.ts'),
+      '@enginx/formx-react': resolve(__dirname, './packages/formx-react/src/index.ts')
+    }
+  },
   build: {
     outDir: 'dist',
     sourcemap: false
