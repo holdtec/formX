@@ -1,0 +1,55 @@
+{
+  "name": "@enginx/formx-react",
+  "version": "1.0.0",
+  "description": "React bindings for formx-core - Schema-driven dynamic form system",
+  "type": "module",
+  "private": false,
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/formx-react.cjs",
+  "module": "./dist/formx-react.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/formx-react.js",
+      "require": "./dist/formx-react.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "@enginx/formx-core": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "@vitejs/plugin-react": "^4.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.6",
+    "vite-plugin-dts": "^3.7.3"
+  },
+  "keywords": [
+    "react",
+    "form",
+    "schema-driven",
+    "dynamic-form",
+    "formx",
+    "headless"
+  ],
+  "author": "@enginx",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holdtec/formX.git",
+    "directory": "packages/formx-react"
+  }
+}
