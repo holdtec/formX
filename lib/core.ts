@@ -59,8 +59,16 @@ export class RuntimeEngine {
     } else {
       console.log(`[Core] ✅ Dependency Graph Built.`);
     }
-    // Initial evaluation disabled to prevent override of initial store values unless explicitly requested
-    // this.evaluateAllExpressions(schema);
+    // Initial evaluation for fields with expressions
+    this.evaluateAllExpressions(schema);
+  }
+
+  private evaluateAllExpressions(schema: FieldSchema[]) {
+    schema.forEach(field => {
+      if (field.expression) {
+        this.evaluateField(field.key, field.expression, { scope: 'GLOBAL' }, true);
+      }
+    });
   }
 
   // --- Dependency Graph Construction ---
@@ -371,11 +379,17 @@ export class RuntimeEngine {
            const prop = token.value.split('.')[1];
            val = (Math as any)[prop];
         }
-        // treat undefined/null as 0 for math safety, unless it's strictly logic
+        // treat undefined/null/NaN as 0 for math safety
         if (val === undefined || val === null) val = 0;
+        if (typeof val === 'number' && isNaN(val)) val = 0;
         // Try parsing string number if possible
-        if (typeof val === 'string' && !isNaN(Number(val)) && val.trim() !== '') {
-            val = parseFloat(val);
+        if (typeof val === 'string') {
+          const trimmed = val.trim();
+          if (trimmed === '' || trimmed === 'NA' || trimmed === 'N/A' || isNaN(Number(trimmed))) {
+            val = 0;
+          } else {
+            val = parseFloat(trimmed);
+          }
         }
         stack.push(val);
       }
