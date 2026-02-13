@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 支持逻辑运算符: `&&`, `||`, `!`
 - 支持 IF 条件函数
 
-## [1.1.0] - 2024-01-XX
+## [1.1.0] - 2026-02-XX
 
 ### Added
 - 新增 `@enginx/formx-react` 独立组件包
@@ -53,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修复表达式求值死循环问题
 - 修复下拉菜单影响导航栏高度问题
 
-## [1.0.0] - 2024-01-15
+## [1.0.0] - 2026-02-13
 
 ### Added
 - 核心引擎 `FormxEngine` 实现

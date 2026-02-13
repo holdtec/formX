@@ -89,7 +89,7 @@ export function App() {
                <span>formx</span>
             </div>
             <p className="text-slate-500 text-sm mb-6">
-              © 2024 @enginx organization. Open source under MIT License.
+              © 2026 @enginx organization. Open source under MIT License.
             </p>
             <div className="flex justify-center space-x-6 text-slate-400">
                <a href="https://github.com/holdtec/formX.git" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 transition-colors"><Github className="w-5 h-5"/></a>
