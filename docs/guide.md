@@ -285,3 +285,179 @@ unsubscribe();
 | `Math.ceil(x)` | 数值 | 向上取整 |
 | `Math.abs(x)` | 数值 | 绝对值 |
 | `Math.sqrt(x)` | 数值 | 平方根 |
+
+---
+
+## 6. 自定义 Store 适配器 (注入 MobX / Vue 3 / Pinia / Redux)
+
+`@enginx/formx-core` 采用 **IoC (控制反转)** 模式设计，不与任何特定的状态管理库绑定。引擎内部通过声明 `RuntimeStore` 接口来读写数据：
+
+```typescript
+export interface RuntimeStore {
+  getState(): Record<string, any>;
+  setValue(path: string, value: any): void;
+  batch(updater: () => void): void;
+  subscribe(listener: (changedPaths: string[]) => void): () => void;
+}
+```
+
+这意味着**只要您提供一个符合上述接口的对象，就可以直接将 MobX、Pinia、Vuex、Redux 甚至小程序的全局 Store 注入到 Formx 中运行**。以下是主流框架的适配器实现模板：
+
+### A. 注入 MobX 适配器 (适用于微信小程序 / React / MobX 架构)
+
+在小程序的 MobX 环境中，可以通过以下适配器将 MobX Observable 注入 Formx：
+
+```typescript
+import { runInAction } from 'mobx';
+import { RuntimeStore } from '@enginx/formx-core';
+
+// 深度路径设值助手 (例如: "items.0.price" -> 10)
+function setDeepValue(obj: any, path: string, value: any) {
+  const parts = path.split('.');
+  let current = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i];
+    if (!current[part]) current[part] = {};
+    current = current[part];
+  }
+  current[parts[parts.length - 1]] = value;
+}
+
+/**
+ * 将 MobX Observable 实例包装为 Formx 的 RuntimeStore
+ * @param mobxState Observable 状态对象
+ */
+export function createMobxStoreAdapter(mobxState: any): RuntimeStore {
+  const listeners = new Set<(paths: string[]) => void>();
+
+  return {
+    // 获取当前状态快照
+    getState: () => mobxState,
+
+    // 写入数据：在 MobX 的 action / runInAction 中安全地修改响应式属性
+    setValue: (path: string, value: any) => {
+      runInAction(() => {
+        setDeepValue(mobxState, path, value);
+      });
+      // 触发依赖于该路径的表单字段重算监听
+      listeners.forEach(listener => listener([path]));
+    },
+
+    // 事务批处理：利用 MobX 的 runInAction 合并多次变动
+    batch: (updater: () => void) => {
+      runInAction(updater);
+    },
+
+    // 状态订阅器
+    subscribe: (listener: (paths: string[]) => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    }
+  };
+}
+```
+
+---
+
+### B. 注入 Vue 3 / Pinia 适配器
+
+在 Vue 3 中，直接将由 `reactive` 包裹的响应式对象注入引擎：
+
+```typescript
+import { reactive } from 'vue';
+import { RuntimeStore } from '@enginx/formx-core';
+
+function setDeepValue(obj: any, path: string, value: any) {
+  const parts = path.split('.');
+  let current = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i];
+    if (!current[part]) current[part] = {};
+    current = current[part];
+  }
+  current[parts[parts.length - 1]] = value;
+}
+
+/**
+ * 包装 Vue3 reactive 对象为 Formx 适配器
+ */
+export function createVueStoreAdapter(initialState: any): RuntimeStore {
+  // 使用 Vue3 reactive 实现双向响应式绑定
+  const state = reactive(initialState);
+  const listeners = new Set<(paths: string[]) => void>();
+
+  return {
+    getState: () => state,
+
+    setValue: (path: string, value: any) => {
+      setDeepValue(state, path, value);
+      listeners.forEach(listener => listener([path]));
+    },
+
+    // Vue 3 默认支持异步 DOM batching 调度，但在计算层我们保持同步执行
+    batch: (updater: () => void) => {
+      updater();
+    },
+
+    subscribe: (listener: (paths: string[]) => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    }
+  };
+}
+```
+
+---
+
+### C. 注入 Vuex 4 适配器
+
+如果您使用的是传统的 Vuex：
+
+```typescript
+import { Store } from 'vuex';
+import { RuntimeStore } from '@enginx/formx-core';
+
+export function createVuexStoreAdapter(vuexStore: Store<any>, moduleNamespace = ''): RuntimeStore {
+  const listeners = new Set<(paths: string[]) => void>();
+
+  // 监听 Vuex mutation
+  vuexStore.subscribe((mutation) => {
+    if (mutation.type.endsWith('UPDATE_FORM_FIELD')) {
+      const { path } = mutation.payload;
+      listeners.forEach(listener => listener([path]));
+    }
+  });
+
+  return {
+    getState: () => {
+      return moduleNamespace 
+        ? vuexStore.state[moduleNamespace] 
+        : vuexStore.state;
+    },
+
+    setValue: (path: string, value: any) => {
+      // 触发 Mutation 修改状态，保证 Vuex 的单向数据流与 Devtools 追踪
+      vuexStore.commit(
+        moduleNamespace ? `${moduleNamespace}/UPDATE_FORM_FIELD` : 'UPDATE_FORM_FIELD', 
+        { path, value }
+      );
+    },
+
+    batch: (updater: () => void) => {
+      updater();
+    },
+
+    subscribe: (listener: (paths: string[]) => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    }
+  };
+}
+```
+
