@@ -21,8 +21,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build:lib": "tsc && vite build -c vite.lib.config.ts",
+    "build:mini": "vite build -c vite.mini.config.ts && npx terser dist-lib/formx-core.mini.js --compress drop_console=true,drop_debugger=true,dead_code=true,passes=3,pure_getters=true,collapse_vars=true,reduce_vars=true --mangle toplevel=true --format comments=false,semicolons=true --module --output dist-lib/formx-core.mini.js",
     "preview": "vite preview",
-    "prepublishOnly": "npm run build:lib"
+    "prepublishOnly": "npm run build:lib && npm run build:mini"
   },
   "peerDependencies": {
     "react": ">=18.0.0"
@@ -41,6 +42,7 @@
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "terser": "^5.47.1",
     "typescript": "^5.3.3",
     "vite": "^5.1.6",
     "vite-plugin-dts": "^3.7.3",

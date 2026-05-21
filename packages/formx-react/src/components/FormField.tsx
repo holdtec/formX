@@ -683,7 +683,7 @@ export function FormField({
   render,
   component: CustomComponent,
   path
-}: FormFieldProps) {
+}: FormFieldProps): React.ReactNode {
   const { value, onChange, onBlur, disabled: fieldDisabled, readOnly, field } = useField(fieldKey, { path });
 
   const fieldType = field?.type || 'TEXT';

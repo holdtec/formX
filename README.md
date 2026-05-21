@@ -26,6 +26,9 @@ formx 是一个 **Schema 驱动**、**可插拔**、**框架无关** 的复杂�
 ## 📦 安装
 
 ```bash
+# 额外构建压缩版 (mini)
+npm run build:mini   # 生成 dist-lib/formx-core.mini.js（约 8.5KB，单行）
+```
 # 使用 npm
 npm install @enginx/formx-core
 
@@ -99,6 +102,12 @@ const schema = [
 ```
 
 ### 2. 初始化引擎
+
+```typescript
+import { createRuntime, createVanillaStore } from '@enginx/formx-core';
+// 若使用极度压缩版，直接引入同路径的 .mini.js
+// import { createRuntime, createVanillaStore } from './dist-lib/formx-core.mini.js';
+```
 
 ```typescript
 import { createRuntime, createVanillaStore } from '@enginx/formx-core';

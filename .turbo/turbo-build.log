@@ -1,0 +1,14 @@
+
+> @enginx/formx-core@2.0.0 build /Users/deltatech/Workspaces/genesis-financial-os/packages/formx
+> tsc && vite build
+
+vite v5.4.21 building for production...
+
+/index.css doesn't exist at build time, it will remain unchanged to be resolved at runtime
+transforming...
+✓ 1491 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                  1.54 kB │ gzip:  0.77 kB
+dist/assets/index-wO1dUwn3.js  319.18 kB │ gzip: 91.06 kB
+✓ built in 5.04s
