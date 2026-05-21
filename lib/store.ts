@@ -8,6 +8,9 @@ export function createVanillaStore(initialState: Record<string, any> = {}): Runt
   let state = JSON.parse(JSON.stringify(initialState)); // Deep copy init
   const listeners: Set<(paths: string[]) => void> = new Set();
   
+  let isBatching = false;
+  let batchedPaths: Set<string> = new Set();
+  
   // Helper to set value by path "items.0.price"
   const setDeepValue = (obj: any, path: string, value: any) => {
     const parts = path.split('.');
@@ -29,11 +32,30 @@ export function createVanillaStore(initialState: Record<string, any> = {}): Runt
       setDeepValue(nextState, path, value);
       state = nextState;
       
-      listeners.forEach(fn => fn([path]));
+      if (isBatching) {
+        batchedPaths.add(path);
+      } else {
+        listeners.forEach(fn => fn([path]));
+      }
     },
     
     batch: (fn: () => void) => {
-      fn(); 
+      if (isBatching) {
+        fn();
+        return;
+      }
+      
+      isBatching = true;
+      try {
+        fn();
+      } finally {
+        isBatching = false;
+        if (batchedPaths.size > 0) {
+          const paths = Array.from(batchedPaths);
+          batchedPaths.clear();
+          listeners.forEach(listener => listener(paths));
+        }
+      }
     },
 
     subscribe: (listener: (paths: string[]) => void) => {

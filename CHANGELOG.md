@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-05-21
+
+### Added
+- 支持变参函数 (Variadic Functions)，如 `MAX(a, b, c)` 等。
+- 支持将数组对象映射为计算参数，聚合计算如 `SUM`，`MAX(list)` 完全融入 RPN 语法树体系。
+- 引入逗号(`,`)运算符处理函数多参数组合。
+
+### Changed
+- 重构核心计算调度机制，使用有向无环图(DAG)拓扑排序 (`getExecutionOrder`) 替代递归计算，彻底消除深度更新时的毛刺 (Glitch) 和冗余计算问题。
+- 重构原生状态管理器 (Vanilla Store)，实现了真正的 `batch` 事务批量更新，有效减少连续设值时 UI 层冗余渲染。
+
+### Fixed
+- 修复 `SUM` 聚合函数硬编码正则表达式的局限性，现在其作为标准函数 AST 节点运行。
+- 修复在深度嵌套级联变动下可能潜在引发堆栈溢出的隐患，大幅提升单据联动效率。
+
 ## [2.0.0] - 2026-02-13
 
 ### Added

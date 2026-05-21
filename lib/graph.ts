@@ -23,6 +23,13 @@ export class DependencyGraph {
   }
 
   /**
+   * 获取所有注册的节点
+   */
+  getAllNodes(): string[] {
+    return Array.from(this.adjacencyList.keys());
+  }
+
+  /**
    * 获取某节点的所有直接依赖（谁依赖我）
    */
   getDirectDependents(node: string): string[] {

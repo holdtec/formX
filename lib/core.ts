@@ -20,7 +20,12 @@ interface Token {
   value: string;
 }
 
+class _ArgsList {
+  constructor(public args: any[]) {}
+}
+
 const PRECEDENCE: Record<string, number> = {
+  ',': 0,
   '||': 1,
   '&&': 2,
   '==': 3, '!=': 3,
@@ -66,9 +71,46 @@ export class RuntimeEngine {
   }
 
   private evaluateAllExpressions(schema: FieldSchema[]) {
-    schema.forEach(field => {
-      if (field.expression) {
-        this.evaluateField(field.key, field.expression, { scope: 'GLOBAL' }, true);
+    const inDegree = new Map<string, number>();
+    this.graph.getAllNodes().forEach(node => inDegree.set(node, 0));
+    
+    this.graph.getAllNodes().forEach(node => {
+      const dependents = this.graph.getDirectDependents(node);
+      dependents.forEach(dep => {
+        inDegree.set(dep, (inDegree.get(dep) || 0) + 1);
+      });
+    });
+
+    const queue: string[] = [];
+    inDegree.forEach((degree, node) => {
+      if (degree === 0) queue.push(node);
+    });
+
+    const order: string[] = [];
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      order.push(current);
+      const dependents = this.graph.getDirectDependents(current);
+      dependents.forEach(dep => {
+        const degree = (inDegree.get(dep) || 0) - 1;
+        inDegree.set(dep, degree);
+        if (degree === 0) queue.push(dep);
+      });
+    }
+
+    order.forEach(key => {
+      const field = this.schema.get(key);
+      if (field && field.expression) {
+        const parentKey = this.parentMap.get(key);
+        if (parentKey) {
+            const listData = this.store.getState()[parentKey] || [];
+            listData.forEach((_: any, rowIndex: number) => {
+                const targetPath = `${parentKey}.${rowIndex}.${key}`;
+                this.evaluateField(targetPath, field.expression!, { scope: 'ROW', rowIndex, listKey: parentKey }, true);
+            });
+        } else {
+            this.evaluateField(key, field.expression!, { scope: 'GLOBAL' }, true);
+        }
       }
     });
   }
@@ -137,9 +179,9 @@ export class RuntimeEngine {
     const rowIndex = isListRow ? parseInt(parts[1]) : -1;
     const parentKey = isListRow ? parts[0] : null;
 
-    const dependents = this.graph.getDirectDependents(key);
+    const order = this.graph.getExecutionOrder(key);
 
-    dependents.forEach(targetKey => {
+    order.forEach(targetKey => {
       const field = this.schema.get(targetKey);
       if (!field || !field.expression) return;
 
@@ -166,31 +208,15 @@ export class RuntimeEngine {
           const state = this.store.getState();
           let result: any = null;
 
-          // Special Handling for Aggregate Functions at the top level (Simple parsing for v1)
-          // Ideally, SUM() should be a function in the parser, but it requires Array context.
-          if (expression.startsWith('SUM(')) {
-              const match = expression.match(/SUM\((.*?)\)/);
-              if (match) {
-                  const fullPath = match[1]; 
-                  const [listKey, fieldKey] = fullPath.split('.');
-                  const list = state[listKey] || [];
-                  result = list.reduce((sum: number, item: any) => {
-                      const val = parseFloat(item[fieldKey]);
-                      return sum + (isNaN(val) ? 0 : val);
-                  }, 0);
-              }
-          } 
-          else {
-              let evalContext: any = {};
-              if (context.scope === 'ROW' && context.listKey && context.rowIndex !== undefined) {
-                  const list = state[context.listKey] || [];
-                  evalContext = { ...state, ...list[context.rowIndex] }; // Mix global state with row state
-              } else {
-                  evalContext = state;
-              }
-
-              result = this.evaluateExpression(expression, evalContext);
+          let evalContext: any = {};
+          if (context.scope === 'ROW' && context.listKey && context.rowIndex !== undefined) {
+              const list = state[context.listKey] || [];
+              evalContext = { ...state, ...list[context.rowIndex] }; // Mix global state with row state
+          } else {
+              evalContext = state;
           }
+
+          result = this.evaluateExpression(expression, evalContext);
 
           if (result !== null && result !== undefined) {
              const currentValue = this.getDeepValue(state, targetPath);
@@ -199,8 +225,6 @@ export class RuntimeEngine {
 
              if (forceUpdate || !this.isValueEqual(currentValue, result)) {
                this.store.setValue(targetPath, result);
-               // Chain reaction
-               this.triggerRecalculation(targetPath);
              }
           }
 
@@ -261,16 +285,15 @@ export class RuntimeEngine {
         i += 2;
         continue;
       }
-      if ('+-*/%^!><'.includes(char)) {
+      if ('+-*/%^!><,'.includes(char)) {
         tokens.push({ type: 'OPERATOR', value: char });
         i++;
         continue;
       }
 
-      // Parentheses & Comma
+      // Parentheses
       if (char === '(') { tokens.push({ type: 'LPAREN', value: '(' }); i++; continue; }
       if (char === ')') { tokens.push({ type: 'RPAREN', value: ')' }); i++; continue; }
-      if (char === ',') { tokens.push({ type: 'COMMA', value: ',' }); i++; continue; }
 
       // Identifiers (Variables or Functions)
       if (/[a-zA-Z_$]/.test(char)) {
@@ -309,17 +332,12 @@ export class RuntimeEngine {
       else if (token.type === 'FUNCTION') {
         operatorStack.push(token);
       }
-      else if (token.type === 'COMMA') {
-        while (operatorStack.length > 0 && operatorStack[operatorStack.length - 1].type !== 'LPAREN') {
-          outputQueue.push(operatorStack.pop()!);
-        }
-      }
       else if (token.type === 'OPERATOR') {
         // Handle Unary Minus: If '-' is at start or follows an operator/LPAREN
         let isUnary = false;
         if (token.value === '-') {
           const prev = tokens[index - 1];
-          if (!prev || prev.type === 'OPERATOR' || prev.type === 'LPAREN' || prev.type === 'COMMA') {
+          if (!prev || prev.type === 'OPERATOR' || prev.type === 'LPAREN') {
             isUnary = true;
           }
         }
@@ -377,23 +395,37 @@ export class RuntimeEngine {
         stack.push(token.value);
       }
       else if (token.type === 'VARIABLE') {
-        let val = context[token.value];
-        // Special case: handle "Math.PI" etc if user uses it as variable
+        let val: any;
         if (token.value.startsWith('Math.')) {
            const prop = token.value.split('.')[1];
            val = (Math as any)[prop];
-        }
-        // treat undefined/null/NaN as 0 for math safety
-        if (val === undefined || val === null) val = 0;
-        if (typeof val === 'number' && isNaN(val)) val = 0;
-        // Try parsing string number if possible
-        if (typeof val === 'string') {
-          const trimmed = val.trim();
-          if (trimmed === '' || trimmed === 'NA' || trimmed === 'N/A' || isNaN(Number(trimmed))) {
-            val = 0;
+        } else if (token.value.includes('.')) {
+          const parts = token.value.split('.');
+          const listName = parts[0];
+          const fieldName = parts[1];
+          if (Array.isArray(context[listName])) {
+            val = context[listName].map((item: any) => {
+              const num = parseFloat(item[fieldName]);
+              return isNaN(num) ? 0 : num;
+            });
           } else {
-            val = parseFloat(trimmed);
+            val = this.getDeepValue(context, token.value);
           }
+        } else {
+          val = context[token.value];
+        }
+        
+        if (!Array.isArray(val) && typeof val !== 'function') {
+           if (val === undefined || val === null) val = 0;
+           if (typeof val === 'number' && isNaN(val)) val = 0;
+           if (typeof val === 'string') {
+             const trimmed = val.trim();
+             if (trimmed === '' || trimmed === 'NA' || trimmed === 'N/A' || isNaN(Number(trimmed))) {
+               val = 0;
+             } else {
+               val = parseFloat(trimmed);
+             }
+           }
         }
         stack.push(val);
       }
@@ -408,6 +440,14 @@ export class RuntimeEngine {
           const b = stack.pop();
           const a = stack.pop();
           switch (token.value) {
+            case ',': 
+               if (a instanceof _ArgsList) {
+                  a.args.push(b);
+                  stack.push(a);
+               } else {
+                  stack.push(new _ArgsList([a, b]));
+               }
+               break;
             case '+': stack.push(a + b); break;
             case '-': stack.push(a - b); break;
             case '*': stack.push(a * b); break;
@@ -418,7 +458,7 @@ export class RuntimeEngine {
             case '<': stack.push(a < b); break;
             case '>=': stack.push(a >= b); break;
             case '<=': stack.push(a <= b); break;
-            case '==': stack.push(a == b); break; // loose equality for "5" == 5
+            case '==': stack.push(a == b); break;
             case '!=': stack.push(a != b); break;
             case '&&': stack.push(a && b); break;
             case '||': stack.push(a || b); break;
@@ -426,77 +466,47 @@ export class RuntimeEngine {
         }
       }
       else if (token.type === 'FUNCTION') {
-        // We don't strictly know arg count from RPN, 
-        // but for standard functions we know.
-        // A generic solution would track arg count in the stack, but simple map works for v1.
         const funcName = token.value.toUpperCase().replace('MATH.', '');
         
-        // Helper to pop N args
-        const popArgs = (n: number) => {
-            const args = [];
-            for(let i=0; i<n; i++) args.unshift(stack.pop());
-            return args;
-        };
+        let args: any[] = [];
+        const top = stack.pop();
+        if (top instanceof _ArgsList) {
+            args = top.args;
+        } else if (top !== undefined) {
+            args = [top];
+        }
 
         switch (funcName) {
-            case 'MAX': {
-                // MAX is variadic. In RPN variadic is hard without marking. 
-                // For this implementation, let's assume binary or use specific logic.
-                // A cheat for RPN variadic functions is checking stack depth or special markers.
-                // To keep it safe/simple for now, we assume 2 arguments for MAX/MIN or array.
-                // Or better: The tokenizer sees `MAX(a, b, c)`.
-                // Standard RPN implies operator arity.
-                // Let's implement fixed arity common functions for now.
-                const b = stack.pop();
-                const a = stack.pop(); 
-                stack.push(Math.max(a, b)); 
+            case 'MAX': 
+                if (args.length === 1 && Array.isArray(args[0])) {
+                    stack.push(Math.max(...args[0]));
+                } else {
+                    stack.push(Math.max(...args));
+                }
+                break;
+            case 'MIN':
+                if (args.length === 1 && Array.isArray(args[0])) {
+                    stack.push(Math.min(...args[0]));
+                } else {
+                    stack.push(Math.min(...args));
+                }
+                break;
+            case 'SUM': {
+                let sum = 0;
+                const items = (args.length === 1 && Array.isArray(args[0])) ? args[0] : args;
+                for (const num of items) {
+                   sum += (typeof num === 'number' && !isNaN(num)) ? num : 0;
+                }
+                stack.push(sum);
                 break;
             }
-            case 'MIN': {
-                const b = stack.pop();
-                const a = stack.pop(); 
-                stack.push(Math.min(a, b)); 
-                break;
-            }
-            case 'POW': {
-                const b = stack.pop();
-                const a = stack.pop();
-                stack.push(Math.pow(a, b));
-                break;
-            }
-            case 'ROUND': {
-                const a = stack.pop();
-                stack.push(Math.round(a));
-                break;
-            }
-            case 'FLOOR': {
-                const a = stack.pop();
-                stack.push(Math.floor(a));
-                break;
-            }
-            case 'CEIL': {
-                const a = stack.pop();
-                stack.push(Math.ceil(a));
-                break;
-            }
-            case 'ABS': {
-                const a = stack.pop();
-                stack.push(Math.abs(a));
-                break;
-            }
-            case 'SQRT': {
-                const a = stack.pop();
-                stack.push(Math.sqrt(a));
-                break;
-            }
-            case 'IF': {
-                // IF(condition, trueVal, falseVal)
-                const falseVal = stack.pop();
-                const trueVal = stack.pop();
-                const condition = stack.pop();
-                stack.push(condition ? trueVal : falseVal);
-                break;
-            }
+            case 'POW': stack.push(Math.pow(args[0], args[1])); break;
+            case 'ROUND': stack.push(Math.round(args[0])); break;
+            case 'FLOOR': stack.push(Math.floor(args[0])); break;
+            case 'CEIL': stack.push(Math.ceil(args[0])); break;
+            case 'ABS': stack.push(Math.abs(args[0])); break;
+            case 'SQRT': stack.push(Math.sqrt(args[0])); break;
+            case 'IF': stack.push(args[0] ? args[1] : args[2]); break;
             default:
                 console.warn(`[Core] Unknown function: ${funcName}`);
                 stack.push(0);
